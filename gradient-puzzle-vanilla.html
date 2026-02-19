@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gradient Puzzle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .elegant-title {
+            font-family: 'Cormorant Garamond', serif;
+            letter-spacing: 0.05em;
+        }
+        
+        .container {
+            min-height: 100vh;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: background 1s ease;
+        }
+        
+        .main-content {
+            max-width: 72rem;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .title {
+            font-size: 3.75rem;
+            font-weight: 300;
+            color: white;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.1em;
+        }
+        
+        .subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            font-weight: 300;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .controls-text {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #374151;
+            font-weight: 300;
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 2rem;
+            border-radius: 9999px;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .btn-active {
+            background: #111827;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: scale(1.05);
+        }
+        
+        .btn-inactive {
+            background: white;
+            color: #4b5563;
+        }
+        
+        .btn-inactive:hover {
+            background: #f9fafb;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 0.375rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .grid-cell {
+            aspect-ratio: 1;
+            border-radius: 0.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .grid-cell.empty {
+            background: white;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .grid-cell.filled {
+            cursor: move;
+            box-shadow: 
+                0 1px 3px rgba(0, 0, 0, 0.12),
+                0 1px 2px rgba(0, 0, 0, 0.24),
+                inset 0 -2px 8px rgba(0, 0, 0, 0.1),
+                inset 0 2px 8px rgba(255, 255, 255, 0.2);
+        }
+        
+        .grid-cell.filled:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 4px 12px rgba(0, 0, 0, 0.15),
+                0 2px 4px rgba(0, 0, 0, 0.12);
+        }
+        
+        .grid-cell.locked {
+            box-shadow: 0 0 0 1px #d1d5db;
+        }
+        
+        .locked-badge {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+        }
+        
+        .empty-marker {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d1d5db;
+            font-size: 1.5rem;
+            font-weight: 300;
+        }
+        
+        .remove-btn {
+            position: absolute;
+            top: -0.375rem;
+            right: -0.375rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            background: white;
+            color: #4b5563;
+            border-radius: 50%;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            line-height: 1;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .remove-btn:hover {
+            background: #f9fafb;
+        }
+        
+        .colors-section {
+            border-top: 1px solid #f3f4f6;
+            padding-top: 1.5rem;
+        }
+        
+        .colors-title {
+            text-align: center;
+            color: #6b7280;
+            font-weight: 300;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+        
+        .colors-grid {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            min-height: 100px;
+        }
+        
+        .color-swatch {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 0.75rem;
+            cursor: move;
+            box-shadow: 
+                0 1px 3px rgba(0, 0, 0, 0.12),
+                inset 0 -2px 8px rgba(0, 0, 0, 0.1),
+                inset 0 2px 8px rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .color-swatch:hover {
+            transform: translateY(-2px);
+        }
+        
+        .victory-card {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .victory-title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: #111827;
+            margin: 1rem 0 0.5rem 0;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .action-btn {
+            padding: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: #374151;
+            font-weight: 300;
+            transition: all 0.3s;
+            border: none;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        .hints-card {
+            margin-top: 1.5rem;
+        }
+        
+        .hints-title {
+            color: #374151;
+            font-weight: 300;
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .hints-list {
+            list-style: none;
+            color: #4b5563;
+            font-size: 0.875rem;
+            font-weight: 300;
+            line-height: 1.75;
+        }
+        
+        .hints-list li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app-container">
+        <div class="main-content">
+            <div class="header">
+                <h1 class="title elegant-title">Gradient</h1>
+                <p class="subtitle">A Color Puzzle</p>
+            </div>
+
+            <div class="card">
+                <div class="controls-text">Arrange colors to complete the gradients</div>
+                <div class="button-group">
+                    <button class="btn btn-active" data-difficulty="easy">Easy</button>
+                    <button class="btn btn-inactive" data-difficulty="harder">Harder</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="grid-container" id="grid"></div>
+                
+                <div class="colors-section">
+                    <h3 class="colors-title" id="colors-title">Colors Remaining</h3>
+                    <div class="colors-grid" id="available-colors"></div>
+                </div>
+            </div>
+
+            <div class="card victory-card hidden" id="victory">
+                <div style="font-size: 3rem;">🏆</div>
+                <h2 class="victory-title elegant-title">Complete</h2>
+                <p style="color: #4b5563; font-weight: 300;">You've solved the puzzle</p>
+            </div>
+
+            <div class="action-buttons">
+                <button class="card action-btn" id="new-puzzle-btn">
+                    ↻ New Puzzle
+                </button>
+                <button class="card action-btn" id="hints-btn">
+                    💡 Show Tips
+                </button>
+            </div>
+
+            <div class="card hints-card hidden" id="hints">
+                <h3 class="hints-title">Solving Tips</h3>
+                <ul class="hints-list">
+                    <li>Start with squares belonging to a single gradient</li>
+                    <li>Intersections must harmonize with all crossing gradients</li>
+                    <li>Locked squares (✦) mark each gradient's endpoints</li>
+                    <li>Each gradient flows smoothly from start to finish</li>
+                    <li>Trust your eye—similar shades belong together</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let state = {
+            difficulty: 'easy',
+            puzzle: null,
+            placedColors: {},
+            availableColors: [],
+            draggedColor: null
+        };
+
+        const GRID_SIZE = 9;
+
+        // Color utilities
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function rgbToHex(r, g, b) {
+            const clamp = val => Math.max(0, Math.min(255, Math.round(val)));
+            return "#" + [r, g, b].map(x => {
+                const hex = clamp(x).toString(16);
+                return hex.length === 1 ? "0" + hex : hex;
+            }).join('');
+        }
+
+        function interpolateColor(color1, color2, factor) {
+            const c1 = hexToRgb(color1);
+            const c2 = hexToRgb(color2);
+            if (!c1 || !c2) return color1;
+            return rgbToHex(
+                c1.r + factor * (c2.r - c1.r),
+                c1.g + factor * (c2.g - c1.g),
+                c1.b + factor * (c2.b - c1.b)
+            );
+        }
+
+        function getRandomColor() {
+            return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+        }
+
+        function colorDistance(color1, color2) {
+            const c1 = hexToRgb(color1);
+            const c2 = hexToRgb(color2);
+            if (!c1 || !c2) return 0;
+            const rD = c1.r - c2.r, gD = c1.g - c2.g, bD = c1.b - c2.b;
+            return Math.sqrt(rD * rD + gD * gD + bD * bD);
+        }
+
+        function getBrightness(color) {
+            const rgb = hexToRgb(color);
+            if (!rgb) return 0;
+            // Calculate perceived brightness (0-255)
+            return (rgb.r * 0.299 + rgb.g * 0.587 + rgb.b * 0.114);
+        }
+
+        function isColorDistinctFromWhite(color) {
+            const brightness = getBrightness(color);
+            // Ensure color is not too bright (too close to white)
+            return brightness < 220;
+        }
+
+        function getContrastingColorPair() {
+            // Use higher contrast requirement for harder mode
+            const minDistance = state.difficulty === 'harder' ? 350 : 300;
+            let color1, color2, distance, attempts = 0;
+            do {
+                color1 = getRandomColor();
+                color2 = getRandomColor();
+                distance = colorDistance(color1, color2);
+                
+                // Ensure both colors are distinct from white
+                const color1DistinctFromWhite = isColorDistinctFromWhite(color1);
+                const color2DistinctFromWhite = isColorDistinctFromWhite(color2);
+                
+                if (distance >= minDistance && color1DistinctFromWhite && color2DistinctFromWhite) {
+                    return { color1, color2 };
+                }
+                
+                attempts++;
+            } while (attempts < 200);
+            
+            return { color1, color2 };
+        }
+
+        function shuffle(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function randomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // Generate puzzle
+        function generatePuzzle() {
+            const gradients = [];
+            const grid = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));
+            const cellColors = {};
+            const lockedCells = new Set();
+            const emptyCells = new Set();
+            const occupiedCells = new Set();
+            const usedEndpointColors = []; // Track all gradient endpoint colors for Harder mode
+
+            const getDistinctColorPair = () => {
+                const minDistance = state.difficulty === 'harder' ? 350 : 300;
+                const minDistanceBetweenGradients = 220; // Increased from 180
+                let attempts = 0;
+                
+                while (attempts < 300) {
+                    const { color1, color2 } = getContrastingColorPair();
+                    
+                    // In Harder mode, check against all previously used endpoint colors
+                    if (state.difficulty === 'harder' && usedEndpointColors.length > 0) {
+                        const color1Distinct = usedEndpointColors.every(usedColor => 
+                            colorDistance(color1, usedColor) > minDistanceBetweenGradients
+                        );
+                        const color2Distinct = usedEndpointColors.every(usedColor => 
+                            colorDistance(color2, usedColor) > minDistanceBetweenGradients
+                        );
+                        
+                        if (color1Distinct && color2Distinct && colorDistance(color1, color2) > minDistance) {
+                            usedEndpointColors.push(color1, color2);
+                            return { color1, color2 };
+                        }
+                    } else {
+                        if (colorDistance(color1, color2) > minDistance) {
+                            usedEndpointColors.push(color1, color2);
+                            return { color1, color2 };
+                        }
+                    }
+                    
+                    attempts++;
+                }
+                
+                // Fallback
+                const { color1, color2 } = getContrastingColorPair();
+                usedEndpointColors.push(color1, color2);
+                return { color1, color2 };
+            };
+
+            const calculateGradientThroughPoint = (length, constraintIndex, constraintColor) => {
+                // For intersecting gradients, mathematical correctness is MORE important than color distinctness
+                // We must calculate the exact endpoints to ensure even spacing through the constraint
+                
+                let startColor = getRandomColor();
+                const factor = constraintIndex / (length - 1);
+                const c1 = hexToRgb(startColor);
+                const target = hexToRgb(constraintColor);
+                
+                if (!c1 || !target || factor === 0 || factor === 1) {
+                    return getDistinctColorPair();
+                }
+                
+                // Calculate the required end color
+                const endColor = rgbToHex(
+                    (target.r - c1.r * (1 - factor)) / factor,
+                    (target.g - c1.g * (1 - factor)) / factor,
+                    (target.b - c1.b * (1 - factor)) / factor
+                );
+                
+                // If colors aren't different enough, try the reverse calculation
+                if (colorDistance(startColor, endColor) < 200) {
+                    const endColorAlt = getRandomColor();
+                    const e = hexToRgb(endColorAlt);
+                    const startColorAlt = rgbToHex(
+                        (target.r - e.r * factor) / (1 - factor),
+                        (target.g - e.g * factor) / (1 - factor),
+                        (target.b - e.b * factor) / (1 - factor)
+                    );
+                    if (colorDistance(startColorAlt, endColorAlt) >= 200) {
+                        // Add to tracking for future gradients
+                        if (state.difficulty === 'harder') {
+                            usedEndpointColors.push(startColorAlt, endColorAlt);
+                        }
+                        return { color1: startColorAlt, color2: endColorAlt };
+                    }
+                }
+                
+                // Use the calculated colors even if they're similar to other endpoints
+                // This preserves even spacing in the gradient
+                if (state.difficulty === 'harder') {
+                    usedEndpointColors.push(startColor, endColor);
+                }
+                return { color1: startColor, color2: endColor };
+            };
+
+            const checkOverlap = (row, col, excludeKey = null) => {
+                const key = `${row},${col}`;
+                return key !== excludeKey && occupiedCells.has(key);
+            };
+
+            if (state.difficulty === 'easy') {
+                // Easy mode: 1 vertical + 1 horizontal
+                const vCol = 4, vStartRow = 2, vLength = 5;
+                const { color1: vStart, color2: vEnd } = getDistinctColorPair();
+                const vColors = [];
+
+                for (let i = 0; i < vLength; i++) {
+                    const color = interpolateColor(vStart, vEnd, i / (vLength - 1));
+                    vColors.push(color);
+                    const key = `${vStartRow + i},${vCol}`;
+                    cellColors[key] = color;
+                    grid[vStartRow + i][vCol] = { color, gradientId: 'v0' };
+                    occupiedCells.add(key);
+                    if (i === 0 || i === vLength - 1) {
+                        lockedCells.add(key);
+                    } else {
+                        emptyCells.add(key);
+                    }
+                }
+
+                const hRow = 4, hStartCol = 1, hLength = 6;
+                const hPosOfIntersection = vCol - hStartCol;
+                const vPosOfIntersection = hRow - vStartRow;
+                const constraintColor = vColors[vPosOfIntersection];
+                const { color1: hStart, color2: hEnd } = calculateGradientThroughPoint(
+                    hLength, hPosOfIntersection, constraintColor
+                );
+                const hColors = [];
+
+                for (let i = 0; i < hLength; i++) {
+                    const color = interpolateColor(hStart, hEnd, i / (hLength - 1));
+                    hColors.push(color);
+                    const col = hStartCol + i;
+                    const key = `${hRow},${col}`;
+                    
+                    if (col === vCol) {
+                        hColors[i] = constraintColor;
+                    } else {
+                        cellColors[key] = color;
+                        grid[hRow][col] = { color, gradientId: 'h0' };
+                        occupiedCells.add(key);
+                        if (i === 0 || i === hLength - 1) {
+                            lockedCells.add(key);
+                        } else {
+                            emptyCells.add(key);
+                        }
+                    }
+                }
+            } else {
+                // Harder mode: v1(7-9) → h1(7-9) → v2(3-6) → h2(3-6) → v3(3-6) → h3(3-6)
+                let lastGradient = null;
+                let lastIntersectionIndex = null;
+
+                for (let gradIndex = 0; gradIndex < 6; gradIndex++) {
+                    const isVertical = gradIndex % 2 === 0;
+                    const isAnchor = gradIndex < 2;
+                    const length = isAnchor ? randomInt(7, 9) : randomInt(3, 6);
+
+                    if (gradIndex === 0) {
+                        // v1: Place centrally
+                        const vCol = randomInt(3, 5);
+                        const vStartRow = randomInt(0, GRID_SIZE - length);
+                        const { color1: start, color2: end } = getDistinctColorPair();
+                        const colors = [];
+
+                        for (let i = 0; i < length; i++) {
+                            const color = interpolateColor(start, end, i / (length - 1));
+                            colors.push(color);
+                            const key = `${vStartRow + i},${vCol}`;
+                            cellColors[key] = color;
+                            grid[vStartRow + i][vCol] = { color, gradientId: 'v0' };
+                            occupiedCells.add(key);
+                            if (i === 0 || i === length - 1) {
+                                lockedCells.add(key);
+                            } else {
+                                emptyCells.add(key);
+                            }
+                        }
+
+                        lastGradient = {
+                            id: 'v0',
+                            type: 'vertical',
+                            col: vCol,
+                            startRow: vStartRow,
+                            length,
+                            colors
+                        };
+
+                    } else {
+                        // Build from previous gradient
+                        const prevLength = lastGradient.length;
+                        const centralStart = Math.floor(prevLength / 3);
+                        const centralEnd = Math.floor(2 * prevLength / 3);
+                        const middleIndices = [];
+                        
+                        for (let i = centralStart; i <= centralEnd; i++) {
+                            if (i > 0 && i < prevLength - 1) {
+                                if (lastIntersectionIndex === null || Math.abs(i - lastIntersectionIndex) > 1) {
+                                    middleIndices.push(i);
+                                }
+                            }
+                        }
+
+                        if (middleIndices.length === 0) {
+                            for (let i = 1; i < prevLength - 1; i++) {
+                                if (lastIntersectionIndex === null || Math.abs(i - lastIntersectionIndex) > 1) {
+                                    middleIndices.push(i);
+                                }
+                            }
+                        }
+
+                        if (middleIndices.length === 0) break;
+
+                        const intersectIndex = middleIndices[randomInt(0, middleIndices.length - 1)];
+                        const intersectColor = lastGradient.colors[intersectIndex];
+                        
+                        let intersectRow, intersectCol;
+                        if (lastGradient.type === 'vertical') {
+                            intersectRow = lastGradient.startRow + intersectIndex;
+                            intersectCol = lastGradient.col;
+                        } else {
+                            intersectRow = lastGradient.row;
+                            intersectCol = lastGradient.startCol + intersectIndex;
+                        }
+
+                        let placed = false;
+                        let attempts = 0;
+
+                        while (!placed && attempts < 20) {
+                            const newIntersectPos = randomInt(1, length - 2);
+                            
+                            if (isVertical) {
+                                const col = intersectCol;
+                                const startRow = intersectRow - newIntersectPos;
+                                
+                                if (startRow >= 0 && startRow + length <= GRID_SIZE) {
+                                    let hasOverlap = false;
+                                    for (let i = 0; i < length; i++) {
+                                        if (checkOverlap(startRow + i, col, `${intersectRow},${intersectCol}`)) {
+                                            hasOverlap = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if (!hasOverlap) {
+                                        const { color1: start, color2: end } = calculateGradientThroughPoint(
+                                            length, newIntersectPos, intersectColor
+                                        );
+                                        const colors = [];
+
+                                        for (let i = 0; i < length; i++) {
+                                            const color = interpolateColor(start, end, i / (length - 1));
+                                            colors.push(color);
+                                            const row = startRow + i;
+                                            const key = `${row},${col}`;
+
+                                            if (row === intersectRow) {
+                                                colors[i] = intersectColor;
+                                            } else {
+                                                cellColors[key] = color;
+                                                grid[row][col] = { color, gradientId: `v${Math.floor(gradIndex / 2)}` };
+                                                occupiedCells.add(key);
+                                                if (i === 0 || i === length - 1) {
+                                                    lockedCells.add(key);
+                                                } else {
+                                                    emptyCells.add(key);
+                                                }
+                                            }
+                                        }
+
+                                        lastGradient = {
+                                            id: `v${Math.floor(gradIndex / 2)}`,
+                                            type: 'vertical',
+                                            col,
+                                            startRow,
+                                            length,
+                                            colors
+                                        };
+                                        lastIntersectionIndex = newIntersectPos;
+                                        placed = true;
+                                    }
+                                }
+                            } else {
+                                const row = intersectRow;
+                                const startCol = intersectCol - newIntersectPos;
+                                
+                                if (startCol >= 0 && startCol + length <= GRID_SIZE) {
+                                    let hasOverlap = false;
+                                    for (let i = 0; i < length; i++) {
+                                        if (checkOverlap(row, startCol + i, `${intersectRow},${intersectCol}`)) {
+                                            hasOverlap = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if (!hasOverlap) {
+                                        const { color1: start, color2: end } = calculateGradientThroughPoint(
+                                            length, newIntersectPos, intersectColor
+                                        );
+                                        const colors = [];
+
+                                        for (let i = 0; i < length; i++) {
+                                            const color = interpolateColor(start, end, i / (length - 1));
+                                            colors.push(color);
+                                            const col = startCol + i;
+                                            const key = `${row},${col}`;
+
+                                            if (col === intersectCol) {
+                                                colors[i] = intersectColor;
+                                            } else {
+                                                cellColors[key] = color;
+                                                grid[row][col] = { color, gradientId: `h${Math.floor(gradIndex / 2)}` };
+                                                occupiedCells.add(key);
+                                                if (i === 0 || i === length - 1) {
+                                                    lockedCells.add(key);
+                                                } else {
+                                                    emptyCells.add(key);
+                                                }
+                                            }
+                                        }
+
+                                        lastGradient = {
+                                            id: `h${Math.floor(gradIndex / 2)}`,
+                                            type: 'horizontal',
+                                            row,
+                                            startCol,
+                                            length,
+                                            colors
+                                        };
+                                        lastIntersectionIndex = newIntersectPos;
+                                        placed = true;
+                                    }
+                                }
+                            }
+                            attempts++;
+                        }
+                        if (!placed) break;
+                    }
+                }
+            }
+
+            state.puzzle = { grid, cellColors, lockedCells, emptyCells };
+            state.availableColors = shuffle(Array.from(emptyCells).map(key => cellColors[key]));
+            state.placedColors = {};
+            
+            render();
+        }
+
+        // Render functions
+        function render() {
+            renderGrid();
+            renderAvailableColors();
+            updateColorsTitle();
+            checkVictory();
+        }
+
+        function renderGrid() {
+            const gridEl = document.getElementById('grid');
+            gridEl.innerHTML = '';
+
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    const key = `${row},${col}`;
+                    const cell = state.puzzle.grid[row][col];
+                    const cellEl = document.createElement('div');
+                    cellEl.className = 'grid-cell';
+                    cellEl.dataset.key = key;
+
+                    if (!cell) {
+                        cellEl.classList.add('empty');
+                    } else {
+                        const isLocked = state.puzzle.lockedCells.has(key);
+                        const placedColor = state.placedColors[key];
+                        const displayColor = isLocked ? cell.color : placedColor;
+
+                        if (displayColor) {
+                            cellEl.classList.add('filled');
+                            cellEl.style.backgroundColor = displayColor;
+                            
+                            if (isLocked) {
+                                cellEl.classList.add('locked');
+                                const badge = document.createElement('div');
+                                badge.className = 'locked-badge';
+                                badge.textContent = '✦';
+                                cellEl.appendChild(badge);
+                            } else {
+                                cellEl.draggable = true;
+                                const removeBtn = document.createElement('button');
+                                removeBtn.className = 'remove-btn';
+                                removeBtn.textContent = '×';
+                                removeBtn.onclick = (e) => {
+                                    e.stopPropagation();
+                                    handleReturnToPool(key);
+                                };
+                                cellEl.appendChild(removeBtn);
+                            }
+                        } else {
+                            cellEl.classList.add('empty');
+                            const marker = document.createElement('div');
+                            marker.className = 'empty-marker';
+                            marker.textContent = '·';
+                            cellEl.appendChild(marker);
+                        }
+
+                        if (!isLocked) {
+                            cellEl.ondragover = (e) => e.preventDefault();
+                            cellEl.ondrop = () => handleDrop(key);
+                        }
+
+                        if (displayColor && !isLocked) {
+                            cellEl.ondragstart = () => handleDragStart(displayColor, key);
+                        }
+                    }
+
+                    gridEl.appendChild(cellEl);
+                }
+            }
+        }
+
+        function renderAvailableColors() {
+            const colorsEl = document.getElementById('available-colors');
+            colorsEl.innerHTML = '';
+
+            state.availableColors.forEach((color, index) => {
+                const swatchEl = document.createElement('div');
+                swatchEl.className = 'color-swatch';
+                swatchEl.style.backgroundColor = color;
+                swatchEl.draggable = true;
+                swatchEl.ondragstart = () => handleDragStart(color, null);
+                colorsEl.appendChild(swatchEl);
+            });
+
+            if (state.availableColors.length === 0 && !checkVictory()) {
+                colorsEl.innerHTML = '<div style="color: #9ca3af; padding: 2rem; font-weight: 300;">All colors placed</div>';
+            }
+        }
+
+        function updateColorsTitle() {
+            const titleEl = document.getElementById('colors-title');
+            const count = state.availableColors.length;
+            titleEl.textContent = `${count} ${count === 1 ? 'Color' : 'Colors'} Remaining`;
+        }
+
+        function checkVictory() {
+            const allFilled = Array.from(state.puzzle.emptyCells).every(key => state.placedColors[key]);
+            if (!allFilled) {
+                document.getElementById('victory').classList.add('hidden');
+                return false;
+            }
+
+            const allCorrect = Array.from(state.puzzle.emptyCells).every(key => {
+                return state.placedColors[key] === state.puzzle.cellColors[key];
+            });
+
+            if (allCorrect) {
+                document.getElementById('victory').classList.remove('hidden');
+                return true;
+            }
+            
+            document.getElementById('victory').classList.add('hidden');
+            return false;
+        }
+
+        // Event handlers
+        function handleDragStart(color, fromKey) {
+            state.draggedColor = { color, fromKey };
+        }
+
+        function handleDrop(key) {
+            if (!state.draggedColor || state.puzzle.lockedCells.has(key)) return;
+
+            if (state.draggedColor.fromKey !== null) {
+                delete state.placedColors[state.draggedColor.fromKey];
+                if (state.draggedColor.fromKey !== key) {
+                    state.availableColors.push(state.draggedColor.color);
+                }
+            } else {
+                state.availableColors = state.availableColors.filter(c => c !== state.draggedColor.color);
+            }
+
+            if (state.placedColors[key]) {
+                state.availableColors.push(state.placedColors[key]);
+            }
+
+            state.placedColors[key] = state.draggedColor.color;
+            state.draggedColor = null;
+            
+            render();
+        }
+
+        function handleReturnToPool(key) {
+            const color = state.placedColors[key];
+            delete state.placedColors[key];
+            state.availableColors.push(color);
+            render();
+        }
+
+        // UI event handlers
+        document.querySelectorAll('[data-difficulty]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                state.difficulty = e.target.dataset.difficulty;
+                document.querySelectorAll('[data-difficulty]').forEach(b => {
+                    b.classList.remove('btn-active');
+                    b.classList.add('btn-inactive');
+                });
+                e.target.classList.add('btn-active');
+                e.target.classList.remove('btn-inactive');
+                generatePuzzle();
+            });
+        });
+
+        document.getElementById('new-puzzle-btn').addEventListener('click', generatePuzzle);
+
+        document.getElementById('hints-btn').addEventListener('click', () => {
+            const hintsEl = document.getElementById('hints');
+            const btn = document.getElementById('hints-btn');
+            hintsEl.classList.toggle('hidden');
+            btn.textContent = hintsEl.classList.contains('hidden') ? '💡 Show Tips' : '💡 Hide Tips';
+        });
+
+        // Initialize
+        generatePuzzle();
+    </script>
+</body>
+</html>
